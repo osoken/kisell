@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from src import __version__, __author__, __description__
+from kisell import __version__, __author__, __description__
 from setuptools import setup
 
 setup(
