@@ -1,0 +1,4 @@
+jedi==0.9.0
+-e git+git@github.com:osoken/kisell.git@82d4d5d4987115855b97928de4ea9c29ea1ea7c7#egg=kisell
+pep8==1.7.0
+six==1.10.0
