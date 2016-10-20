@@ -2,8 +2,8 @@
 
 from collections import Iterable
 from abc import ABCMeta, abstractmethod
-import itertools
-import operator
+
+import six
 
 
 class Error(Exception):
@@ -22,14 +22,16 @@ class EmptyPipeError(Error):
 
 
 class OriginWithUpstreamError(Error):
-    """Exception is raised when an upstream is set to Origin class instance
+    """This exception is raised when an upstream is set to Origin class
+    instance
     """
 
     def __init__(self):
         super(OriginWithUpstreamError, self).__init__()
 
 
-class Base(Iterable, metaclass=ABCMeta):
+@six.add_metaclass(ABCMeta)
+class Base(Iterable):
     """Base stream class
     """
 
@@ -95,12 +97,20 @@ class Base(Iterable, metaclass=ABCMeta):
         pass
 
     def __iter__(self):
+        """return stream
+        """
         return self.stream
 
     def __next__(self):
+        """return next of the stream
+        """
         return next(self.stream)
 
     def run(self, hook=None):
+        """
+
+        :param hook: a one-argument function
+        """
         if hook is None:
             for x in self.stream:
                 pass
@@ -125,7 +135,7 @@ class Origin(Base):
 
     @upstream.setter
     def upstream(self, s):
-        raise OriginWithUpstreamException()
+        raise OriginWithUpstreamError()
 
     def _initialize(self):
         yield from self.__origin
@@ -146,20 +156,6 @@ class Origin(Base):
         return True
 
 
-class FileReadStream(Origin):
-    def __init__(self, file_name, encoding=None):
-        super(FileReadStream, self).__init__(
-            open(file_name, encoding=encoding or 'utf-8', mode='r')
-        )
-
-
-class FileWriteStream(Pipe):
-    def __init__(self, file_name, encoding=None):
-        super(FileWriteStream, self).__init__(
-            open(file_name, encoding=encoding or 'utf-8', mode='w')
-        )
-
-
 class Pipe(Base):
     def __init__(self):
         super(Pipe, self).__init__()
@@ -168,7 +164,7 @@ class Pipe(Base):
     @property
     def upstream(self):
         if self.__upstream is None:
-            raise EmptyPipeException()
+            raise EmptyPipeError()
         return self.__upstream
 
     @upstream.setter
@@ -193,94 +189,3 @@ class Pipe(Base):
 
     def __exit__(self, type, value, traceback):
         return self.upstream.__exit__(type, value, traceback)
-
-
-class Limit(Pipe):
-    def __init__(self, limit):
-        super(Limit, self).__init__()
-        self.limit = limit
-
-    def _initialize(self):
-        count = 0
-        for x in self.upstream:
-            if count >= self.limit:
-                raise StopIteration()
-            yield x
-            count += 1
-
-
-class Skip(Pipe):
-    def __init__(self, skip):
-        super(Skip, self).__init__()
-        self.skip = skip
-
-    def _initialize(self):
-        count = 0
-        while count < self.skip:
-            next(self.upstream)
-            count += 1
-        yield from self.upstream
-
-
-class Chain(Pipe):
-    def __init__(self, *iterables):
-        super(Chain, self).__init__()
-        self.iterables = tuple(it if isinstance(it, Base) else Origin(it)
-                               for it in iterables)
-
-    def _initialize(self):
-        if self.upstream is not None:
-            yield from self.upstream
-        for it in self.iterables:
-            yield from it
-
-
-class Enumerate(Pipe):
-    def __init__(self):
-        super(Enumerate, self).__init__()
-
-    def _initialize(self):
-        count = 0
-        for x in self.upstream:
-            yield (count, x)
-            count += 1
-
-
-class Zip(Pipe):
-    def __init__(self, *iterables):
-        super(Zip, self).__init__()
-        self.iterables = tuple(it if isinstance(it, Base) else Origin(it)
-                               for it in iterables)
-
-    def _initialize(self):
-        yield from zip(self.upstream, *self.iterables)
-
-
-class Map(Pipe):
-    def __init__(self, func, *iterables):
-        super(Map, self).__init__()
-        self.func = func
-        self.iterables = tuple(it if isinstance(it, Base) else Origin(it)
-                               for it in iterables)
-
-    def _initialize(self):
-        yield from map(self.func, self.upstream, *self.iterables)
-
-
-class StarMap(Pipe):
-    def __init__(self, func):
-        super(StarMap, self).__init__()
-        self.func = func
-
-    def _initialize(self):
-        yield from itertools.starmap(self.func, self.upstream)
-
-
-class Accumulate(Pipe):
-    def __init__(self, func=None):
-        super(Accumulate, self).__init__()
-        self.func = func
-
-    def _initialize(self):
-        yield from itertools.accumulate(self.upstream,
-                                        self.func or operator.add)
