@@ -49,6 +49,7 @@ class Base(Iterable):
         pass
 
     @upstream.setter
+    @abstractmethod
     def upstream(self, s):
         """set the upstream of this instance
 
@@ -73,7 +74,7 @@ class Base(Iterable):
         downstream.upstream = self
         return downstream
 
-    def __gt__(self, other):
+    def __add__(self, other):
         """call .then method and return the same value
 
         :param other: Pipe instance
@@ -87,7 +88,6 @@ class Base(Iterable):
             if self.upstream is not None:
                 self.upstream.__initialize()
             self.__stream = self._initialize()
-        return self.__stream
 
     @abstractmethod
     def _initialize(self):
@@ -99,7 +99,7 @@ class Base(Iterable):
     def __iter__(self):
         """return stream
         """
-        return self.stream
+        yield from self.stream
 
     def __next__(self):
         """return next of the stream
@@ -107,9 +107,9 @@ class Base(Iterable):
         return next(self.stream)
 
     def run(self, hook=None):
-        """
+        """just run through the loop
 
-        :param hook: a one-argument function
+        :param hook: one-argument function
         """
         if hook is None:
             for x in self.stream:
@@ -121,7 +121,13 @@ class Base(Iterable):
 
 
 class Origin(Base):
+    """The base class of ``kisell`` class with no upstream.
+    """
     def __init__(self, iterable):
+        """Initialize Origin object.
+
+        :param iterable: an iterable
+        """
         super(Origin, self).__init__()
         if not isinstance(iterable, Iterable):
             raise TypeError(
@@ -131,29 +137,45 @@ class Origin(Base):
 
     @property
     def origin(self):
+        """return internal origin object.
+        """
         return self.__origin
 
     @property
     def upstream(self):
+        """return ``None``
+        """
         return None
 
     @upstream.setter
     def upstream(self, s):
+        """raises ``OriginWithUpstreamError``
+        """
         raise OriginWithUpstreamError()
 
     def _initialize(self):
-        yield from self.__origin
+        """return iterator from the origin object.
+        """
+        return self.__origin
 
     def __getattr__(self, name):
+        """return attribute of the origin object.
+        """
         return self.__origin.__getattribute__(name)
 
     def __enter__(self):
+        """called when object is used with ``with`` statement.
+        return the return value of the origin's enter function if the origin
+        has it, self otherwise.
+        """
         if hasattr(self.__origin, '__enter__') and \
                 callable(self.__origin.__enter__):
             return self.__origin.__enter__()
         return self
 
     def __exit__(self, type, value, traceback):
+        """called when exit ``with`` statemen.
+        """
         if hasattr(self.__origin, '__exit__') and \
                 hasattr(self.__origin.__exit__, '__call__'):
             return self.__origin.__exit__(type, value, traceback)
@@ -161,6 +183,8 @@ class Origin(Base):
 
 
 class Pipe(Base):
+    """The base class of ``kisell`` class with upstream.
+    """
     def __init__(self):
         super(Pipe, self).__init__()
         self.__upstream = None
