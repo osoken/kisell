@@ -123,6 +123,10 @@ class Base(Iterable):
 class Origin(Base):
     def __init__(self, iterable):
         super(Origin, self).__init__()
+        if not isinstance(iterable, Iterable):
+            raise TypeError(
+                '\'{}\' object is not iterable'.format(type(iterable).__name__)
+            )
         self.__origin = iterable
 
     @property
