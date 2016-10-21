@@ -175,7 +175,7 @@ class Origin(Base):
         return self
 
     def __exit__(self, type, value, traceback):
-        """called when exit ``with`` statemen.
+        """called when exit ``with`` statement.
         """
         if hasattr(self.__origin, '__exit__') and \
                 hasattr(self.__origin.__exit__, '__call__'):
