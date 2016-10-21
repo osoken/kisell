@@ -24,7 +24,8 @@ class BaseTester(unittest.TestCase):
         def _initialize(self):
             self.init_count += 1
             if self.upstream is None:
-                yield from range(4)
+                for x in range(4):
+                    yield x
             else:
                 for x in self.upstream:
                     yield x + 1
@@ -36,8 +37,11 @@ class BaseTester(unittest.TestCase):
         pass
 
     def test__init__(self):
+        a = []
         with self.assertRaises(TypeError):
-            obj = core.Base()
+            for x in core.Base():
+                a.append(x)
+        self.assertEqual(len(a), 0)
         self.assertTrue(isinstance(BaseTester.Concrete(), core.Base))
 
     def test_property_upstream(self):

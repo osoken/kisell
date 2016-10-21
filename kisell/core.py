@@ -31,7 +31,7 @@ class OriginWithUpstreamError(Error):
 
 
 @six.add_metaclass(ABCMeta)
-class Base(Iterable):
+class Base(six.Iterator):
     """Base stream class
     """
 
@@ -99,7 +99,8 @@ class Base(Iterable):
     def __iter__(self):
         """return stream
         """
-        yield from self.stream
+        for x in self.stream:
+            yield x
 
     def __next__(self):
         """return next of the stream
