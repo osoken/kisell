@@ -168,6 +168,18 @@ class OriginTester(unittest.TestCase):
             test.close()
             self.assertTrue(f.closed)
 
+    def test__enter__exit__(self):
+        with core.Origin([0, 2, 4, 5]) as test:
+            res = list(test)
+            self.assertEqual(res[0], 0)
+            self.assertEqual(res[1], 2)
+            self.assertEqual(len(res), 4)
+        fin = open(__file__, 'r')
+        with core.Origin(fin) as test:
+            s = test.read()
+            self.assertEqual(s[0], '#')
+        self.assertTrue(fin.closed)
+
 
 if __name__ == '__main__':
     unittest.main()
