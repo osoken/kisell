@@ -169,6 +169,5 @@ class OriginTester(unittest.TestCase):
             self.assertTrue(f.closed)
 
 
-
 if __name__ == '__main__':
     unittest.main()
