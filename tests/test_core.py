@@ -150,6 +150,29 @@ class OriginTester(unittest.TestCase):
         with self.assertRaises(AttributeError):
             test.origin = [0, 1, 2]
 
+    def test_property_upstream(self):
+        test = core.Origin('123')
+        self.assertIsNone(test.upstream)
+        with self.assertRaises(core.OriginWithUpstreamError):
+            test.upstream = [1, 2, 3]
+        with self.assertRaises(core.OriginWithUpstreamError):
+            test.upstream = core.Origin([0, 1, 2])
+
+    def test_initialize(self):
+        origin = '123'
+        test = core.Origin(origin)
+        self.assertEqual(test.stream, origin)
+
+    def test__getattr__(self):
+        origin = 'abcde'
+        test = core.Origin(origin)
+        self.assertEqual(test.upper(), origin.upper())
+        test.upper = lambda: test.origin[0].upper() + test.origin[1:]
+        self.assertEqual(origin.upper(), 'ABCDE')
+        self.assertNotEqual(origin.upper(), test.upper())
+        with self.assertRaises(AttributeError):
+            test.nonsuch
+
 
 if __name__ == '__main__':
     unittest.main()

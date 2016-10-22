@@ -102,11 +102,6 @@ class Base(six.Iterator):
         for x in self.stream:
             yield x
 
-    def __next__(self):
-        """return next of the stream
-        """
-        return next(self.stream)
-
     def run(self, hook=None):
         """just run through the loop
 
