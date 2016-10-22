@@ -96,23 +96,12 @@ class BaseTester(unittest.TestCase):
             cnt += 1
         self.assertEqual(len(list(BaseTester.Concrete())), cnt)
 
-    def test__next__(self):
-        cnt = 0
-        test = BaseTester.Concrete()
-        test2 = BaseTester.Concrete()
-        while True:
-            try:
-                self.assertEqual(next(test), test2.__next__())
-                cnt += 1
-            except StopIteration:
-                break
-        self.assertEqual(len(list(BaseTester.Concrete())), cnt)
-
     def test_run(self):
         test = BaseTester.Concrete()
         test.run()
-        with self.assertRaises(StopIteration):
-            next(test)
+        rest = list(test)
+        self.assertEqual(len(rest), 0)
+
         res = []
 
         def push(x):
@@ -120,8 +109,8 @@ class BaseTester(unittest.TestCase):
 
         test = BaseTester.Concrete()
         test.run(push)
-        with self.assertRaises(StopIteration):
-            next(test)
+        rest = list(test)
+        self.assertEqual(len(rest), 0)
         self.assertEqual(len(res), len(list(BaseTester.Concrete())))
 
 
@@ -172,6 +161,8 @@ class OriginTester(unittest.TestCase):
         self.assertNotEqual(origin.upper(), test.upper())
         with self.assertRaises(AttributeError):
             test.nonsuch
+
+
 
 
 if __name__ == '__main__':
