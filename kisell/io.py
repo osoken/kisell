@@ -38,7 +38,7 @@ class WriteStream(Pipe):
 
     def __getattr__(self, name):
         try:
-            return self.__writable.__getattribute__(name)s
+            return self.__writable.__getattribute__(name)
         except AttributeError:
             pass
         return super(WriteStream, self).__getattr__(name)
