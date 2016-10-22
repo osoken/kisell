@@ -160,8 +160,13 @@ class OriginTester(unittest.TestCase):
         self.assertEqual(origin.upper(), 'ABCDE')
         self.assertNotEqual(origin.upper(), test.upper())
         with self.assertRaises(AttributeError):
-            test.nonsuch
-
+            test.non_such_attribute
+        with open(__file__, 'r') as f:
+            test = core.Origin(f)
+            s = test.read()
+            self.assertEqual(s[0], '#')
+            test.close()
+            self.assertTrue(f.closed)
 
 
 
