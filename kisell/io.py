@@ -23,7 +23,7 @@ class ReadStream(Origin):
                     break
         return f
 
-    def __init__(self, readable, buffer_size):
+    def __init__(self, readable, buffer_size=4096):
         super(ReadStream, self).__init__(
             readable, self.__class__.__generator(buffer_size)
         )
