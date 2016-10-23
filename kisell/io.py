@@ -13,7 +13,7 @@ class ReadStream(Origin):
     """
 
     @classmethod
-    def __gererator(cls, buffer_size):
+    def __generator(cls, buffer_size):
         def f(readable):
             while True:
                 buf = readable.read(buffer_size)
