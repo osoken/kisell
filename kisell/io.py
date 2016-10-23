@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from builtins import open
+
 from . core import Origin, Pipe
 
 
@@ -9,11 +11,10 @@ class FileReadStream(Origin):
 
     :param name: file name
     :param encoding: file encoding (default: utf-8)
-
     """
-    def __init__(self, name, encoding=None):
+    def __init__(self, name, encoding='utf-8'):
         super(FileReadStream, self).__init__(
-            open(name, encoding=encoding or 'utf-8', mode='r')
+            open(name, encoding=encoding, mode='r')
         )
 
 
@@ -23,7 +24,6 @@ class WriteStream(Pipe):
     :param writable: writable object
     :param lineterminator: line terminator (default: ``\\n``). ``None`` for not
     to insert line ends.
-
     """
     def __init__(self, writable, lineterminator='\n'):
         super(WriteStream, self).__init__()
