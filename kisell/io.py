@@ -44,25 +44,19 @@ class FileReadStream(Origin):
 
 class WriteStream(Pipe):
     """``WriteStream`` is an output stream. Write each line into ``writable``.
+    On each iteration, it consumes one element and write it to the ``writable``
+    and yields ``None``.
 
     :param writable: writable object
-    :param lineterminator: line terminator (default: ``\\n``). ``None`` for not
-    to insert line ends.
+    :param lineterminator: line terminator (default: ``\\n``). specify ``''``
+    not to add lineterminator
     """
     def __init__(self, writable, lineterminator='\n'):
-        super(WriteStream, self).__init__()
+        super(WriteStream, self).__init__(writable)
         self.__writable = writable
         self.lineterminator = lineterminator
 
     def _initialize(self):
         for x in self.upstream:
-            self.__writable.write(x)
-            if self.lineterminator is not None:
-                self.__writable.write(self.lineterminator)
-
-    def __getattr__(self, name):
-        try:
-            return self.__writable.__getattribute__(name)
-        except AttributeError:
-            pass
-        return super(WriteStream, self).__getattr__(name)
+            self.__writable.write(x + self.lineterminator)
+            yield None
