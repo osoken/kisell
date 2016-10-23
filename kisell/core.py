@@ -3,7 +3,7 @@
 from collections import Iterable
 from abc import ABCMeta, abstractmethod
 
-import six
+from future.utils import with_metaclass
 
 
 class Error(Exception):
@@ -30,8 +30,7 @@ class OriginWithUpstreamError(Error):
         super(OriginWithUpstreamError, self).__init__()
 
 
-@six.add_metaclass(ABCMeta)
-class Base(six.Iterator):
+class Base(Iterable, with_metaclass(ABCMeta)):
     """Base stream class
     """
 
@@ -118,18 +117,27 @@ class Base(six.Iterator):
 
 class Origin(Base):
     """The base class of ``kisell`` class with no upstream.
-    """
-    def __init__(self, iterable):
-        """Initialize Origin object.
 
-        :param iterable: an iterable
+    :param origin: an iterable or an object
+    :param generator: None or a one-argument function which makes origin
+    iterable.
+    """
+    def __init__(self, origin, generator=None):
+        """Initialize Origin object.
         """
         super(Origin, self).__init__()
-        if not isinstance(iterable, Iterable):
-            raise TypeError(
-                '\'{}\' object is not iterable'.format(type(iterable).__name__)
-            )
-        self.__origin = iterable
+        if generator is None:
+            if not isinstance(origin, Iterable):
+                raise TypeError(
+                    '\'{}\' object is not iterable'.format(
+                        type(origin).__name__
+                    )
+                )
+            self.__origin = origin
+            self.__generator = self.__origin
+        else:
+            self.__origin = origin
+            self.__generator = generator(self.__origin)
 
     @property
     def origin(self):
@@ -152,7 +160,7 @@ class Origin(Base):
     def _initialize(self):
         """return iterator from the origin object.
         """
-        return self.__origin
+        return self.__generator
 
     def __getattr__(self, name):
         """return attribute of the origin object.
@@ -180,10 +188,13 @@ class Origin(Base):
 
 class Pipe(Base):
     """The base class of ``kisell`` class with upstream.
+
+    :param attribute_base: object
     """
-    def __init__(self):
+    def __init__(self, attribute_base=None):
         super(Pipe, self).__init__()
         self.__upstream = None
+        self.__attribute_base = attribute_base
 
     @property
     def upstream(self):
@@ -199,6 +210,11 @@ class Pipe(Base):
             self.__upstream.upstream = s
 
     def __getattr__(self, name):
+        if self.__attribute_base is not None:
+            try:
+                return self.__getattribute__(self.__attribute_base, name)
+            except AttributeError:
+                pass
         if self.__upstream is None:
             raise AttributeError(self.__class__, name)
         try:
@@ -208,8 +224,16 @@ class Pipe(Base):
         return self.__upstream.__getattr__(name)
 
     def __enter__(self):
+        if self.__attribute_base is not None and \
+           hasattr(self.__attribute_base, '__enter__'):
+            self.__attribute_base.__enter__()
         self.upstream.__enter__()
         return self
 
     def __exit__(self, type, value, traceback):
+        if self.__attribute_base is not None and \
+           hasattr(self.__attribute_base, '__exit__'):
+            retval = self.__attribute_base.__exit__(type, value, traceback)
+            self.upstream.__exit__(type, value, traceback)
+            return retval
         return self.upstream.__exit__(type, value, traceback)
