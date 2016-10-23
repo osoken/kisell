@@ -3,7 +3,7 @@
 from collections import Iterable
 from abc import ABCMeta, abstractmethod
 
-import six
+from future.utils import with_metaclass
 
 
 class Error(Exception):
@@ -30,8 +30,7 @@ class OriginWithUpstreamError(Error):
         super(OriginWithUpstreamError, self).__init__()
 
 
-@six.add_metaclass(ABCMeta)
-class Base(six.Iterator):
+class Base(Iterable, with_metaclass(ABCMeta)):
     """Base stream class
     """
 
