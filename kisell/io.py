@@ -60,3 +60,17 @@ class WriteStream(Pipe):
         for x in self.upstream:
             self.__writable.write(x + self.lineterminator)
             yield None
+
+
+class FileWriteStream(WriteStream):
+    """``FileWriteStream`` is a file output stream.
+
+    :param name: file name
+    :param encoding: file encoding (defautl: utf-8)
+    :param lineterminator: line end character (default: ``\\n'')
+    """
+    def __init__(self, name, encoding='utf-8', lineterminator='\n'):
+        super(FileWriteStream, self).__init__(
+            open(name, encoding=encoding, mode='w'),
+            lineterminator=lineterminator
+        )
