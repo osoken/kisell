@@ -5,6 +5,30 @@ from builtins import open
 from . core import Origin, Pipe
 
 
+class ReadStream(Origin):
+    """``ReadStream`` is an input stream wrapped by ``kisell.core.Origin``.
+
+    :param readable: readable object
+    :param buffer_size: size of buffer (default: 4096)
+    """
+
+    @classmethod
+    def __gererator(cls, buffer_size):
+        def f(readable):
+            while True:
+                buf = readable.read(buffer_size)
+                if len(buf) != 0:
+                    yield buf
+                else:
+                    break
+        return f
+
+    def __init__(self, readable, buffer_size):
+        super(ReadStream, self).__init__(
+            readable, self.__class__.__generator(buffer_size)
+        )
+
+
 class FileReadStream(Origin):
     """``FileReadStream`` is a file input stream wrapped by
     ``kisell.core.Origin``.

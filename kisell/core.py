@@ -117,18 +117,27 @@ class Base(Iterable, with_metaclass(ABCMeta)):
 
 class Origin(Base):
     """The base class of ``kisell`` class with no upstream.
-    """
-    def __init__(self, iterable):
-        """Initialize Origin object.
 
-        :param iterable: an iterable
+    :param origin: an iterable or an object
+    :param generator: None or a one-argument function which makes origin
+    iterable.
+    """
+    def __init__(self, origin, generator=None):
+        """Initialize Origin object.
         """
         super(Origin, self).__init__()
-        if not isinstance(iterable, Iterable):
-            raise TypeError(
-                '\'{}\' object is not iterable'.format(type(iterable).__name__)
-            )
-        self.__origin = iterable
+        if generator is None:
+            if not isinstance(origin, Iterable):
+                raise TypeError(
+                    '\'{}\' object is not iterable'.format(
+                        type(origin).__name__
+                    )
+                )
+            self.__origin = origin
+            self.__generator = self.__origin
+        else:
+            self.__origin = origin
+            self.__generator = generator(self.__origin)
 
     @property
     def origin(self):
@@ -151,7 +160,7 @@ class Origin(Base):
     def _initialize(self):
         """return iterator from the origin object.
         """
-        return self.__origin
+        return self.__generator
 
     def __getattr__(self, name):
         """return attribute of the origin object.
