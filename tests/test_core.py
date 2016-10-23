@@ -140,6 +140,14 @@ class OriginTester(unittest.TestCase):
             self.assertEqual(x, y)
         with self.assertRaises(TypeError):
             core.Origin(123)
+        test = core.Origin('123 234 345 456', lambda x: x.split(' '))
+        l = list(test)
+        self.assertEqual(len(l), 4)
+        self.assertEqual(l[0], '123')
+        self.assertEqual(l[1], '234')
+        self.assertEqual(l[2], '345')
+        self.assertEqual(l[3], '456')
+        self.assertEqual(test.__len__(), len('123 234 345 456'))
 
     def test_property_origin(self):
         range_object = range(10)
