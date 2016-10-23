@@ -188,10 +188,13 @@ class Origin(Base):
 
 class Pipe(Base):
     """The base class of ``kisell`` class with upstream.
+
+    :param attribute_base: object
     """
-    def __init__(self):
+    def __init__(self, attribute_base=None):
         super(Pipe, self).__init__()
         self.__upstream = None
+        self.__attribute_base = attribute_base
 
     @property
     def upstream(self):
@@ -207,6 +210,11 @@ class Pipe(Base):
             self.__upstream.upstream = s
 
     def __getattr__(self, name):
+        if self.__attribute_base is not None:
+            try:
+                return self.__getattribute__(self.__attribute_base, name)
+            except AttributeError:
+                pass
         if self.__upstream is None:
             raise AttributeError(self.__class__, name)
         try:
@@ -216,8 +224,16 @@ class Pipe(Base):
         return self.__upstream.__getattr__(name)
 
     def __enter__(self):
+        if self.__attribute_base is not None and \
+           hasattr(self.__attribute_base, '__enter__'):
+            self.__attribute_base.__enter__()
         self.upstream.__enter__()
         return self
 
     def __exit__(self, type, value, traceback):
+        if self.__attribute_base is not None and \
+           hasattr(self.__attribute_base, '__exit__'):
+            retval = self.__attribute_base.__exit__(type, value, traceback)
+            self.upstream.__exit__(type, value, traceback)
+            return retval
         return self.upstream.__exit__(type, value, traceback)
