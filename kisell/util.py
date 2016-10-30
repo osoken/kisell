@@ -1,6 +1,7 @@
 # -*- coding; utf-8 -*-
 
 from datetime import datetime
+from functools import reduce
 
 from . core import Origin, Pipe
 
@@ -100,5 +101,25 @@ class Count(Pipe):
 
 
 class CompoOrigin(Origin):
+    """Make Origin object consist of origin an
+
+    :param origin: the origin of the kisell component.
+    :param args: pipes
+    """
     def __init__(self, origin, *args):
-        super(CompoOrigin, self).__init__(origin)
+        super(CompoOrigin, self).__init__(
+            reduce(lambda x, y: x.then(y), args, origin)
+        )
+
+
+class CompoPipe(Pipe):
+    """Bundle several pipes.
+
+    :param args: pipes
+    """
+    def __init__(self, *args):
+        super(CompoPipe, self).__init__(reduce(lambda x, y: x.then(y), args))
+        self.upstream = self._Pipe__attribute_base
+
+    def _initialize(self):
+        return self.upstream
