@@ -105,22 +105,11 @@ class BaseTester(unittest.TestCase):
             cnt += 1
         self.assertEqual(len(list(BaseTester.Concrete())), cnt)
 
-    def test_run(self):
+    def test__call__(self):
         test = BaseTester.Concrete()
-        test.run()
+        test()
         rest = list(test)
         self.assertEqual(len(rest), 0)
-
-        res = []
-
-        def push(x):
-            res.append(x)
-
-        test = BaseTester.Concrete()
-        test.run(push)
-        rest = list(test)
-        self.assertEqual(len(rest), 0)
-        self.assertEqual(len(res), len(list(BaseTester.Concrete())))
 
 
 class OriginTester(unittest.TestCase):
