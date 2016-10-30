@@ -107,17 +107,11 @@ class Base(Iterable, with_metaclass(ABCMeta)):
             yield x
         self._finalize()
 
-    def run(self, hook=None):
-        """just run through the loop
-
-        :param hook: one-argument function
+    def __call__(self):
+        """just run the iteration
         """
-        if hook is None:
-            for x in self.stream:
-                pass
-        else:
-            for x in self.stream:
-                hook(x)
+        for x in self:
+            pass
         return self
 
 

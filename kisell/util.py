@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from . core import Pipe
+from . core import Origin, Pipe
 
 
 class Attr(Pipe):
@@ -33,6 +33,7 @@ class Timing(Pipe):
         return self.upstream
 
     def _finalize(self):
+        print('TIMING FINALIZE')
         self.finalized_at = datetime.now()
 
 
@@ -48,7 +49,7 @@ class OnInitialize(Pipe):
 
     def _initialize(self):
         self.on_initialize()
-        return self.stream
+        return self.upstream
 
 
 class OnFinalize(Pipe):
@@ -60,6 +61,9 @@ class OnFinalize(Pipe):
     def __init__(self, f):
         super(OnFinalize, self).__init__()
         self.on_finalize = f
+
+    def _initialize(self):
+        return self.upstream
 
     def _finalize(self):
         self.on_finalize()
@@ -93,3 +97,8 @@ class Count(Pipe):
         for x in self.upstream:
             self.count += 1
             yield x
+
+
+class CompoOrigin(Origin):
+    def __init__(self, origin, *args):
+        super(CompoOrigin, self).__init__(origin)
