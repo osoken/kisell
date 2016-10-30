@@ -1,0 +1,81 @@
+# -*- coding; utf-8 -*-
+
+from datetime import datetime
+
+from . core import Pipe
+
+
+class Attr(Pipe):
+    """Just add attributes to this Pipe object.
+
+    :param kwargs: each key word becomes the attribute name and each
+    argument becomes the attribute's value
+    """
+    def __init__(self, **kwargs):
+        super(Attr, self).__init__()
+        for (k, v) in kwargs:
+            setattr(self, k, v)
+
+    def _initialize(self):
+        return self.upstream
+
+
+class Timing(Pipe):
+    """Record timestamps when it is ``created_at``, ``initialized_at`` and
+    ``finalized_at``.
+    """
+    def __init__(self):
+        super(Timing, self).__init__()
+        self.created_at = datetime.now()
+
+    def _initialize(self):
+        self.initialized_at = datetime.now()
+        return self.upstream
+
+    def _finalize(self):
+        self.finalized_at = datetime.now()
+
+
+class OnInitialize(Pipe):
+    """Add initialization hook for this kisell.
+
+    :param f: zero-argument function. this is called when this kisell is
+    initialized
+    """
+    def __init__(self, f):
+        super(OnInitialize, self).__init__()
+        self.on_initialize = f
+
+    def _initialize(self):
+        self.on_initialize()
+        return self.stream
+
+
+class OnFinalize(Pipe):
+    """Add finalization hook for this kisell.
+
+    :param f: zero-argument function. this is called when this kisell is
+    finalized.
+    """
+    def __init__(self, f):
+        super(OnFinalize, self).__init__()
+        self.on_finalize = f
+
+    def _finalize(self):
+        self.on_finalize()
+
+
+class OnIterate(Pipe):
+    """Add iteration hook for this kisell.
+
+    :param f: one-argument function. this is called before each iteration. take
+    the item from the upstream as the argument.
+    """
+    def __init__(self, f):
+        super(OnIterate, self).__init__()
+        self.on_iterate = f
+
+    def _initialize(self):
+        for x in self.upstream:
+            self.on_iterate(x)
+            yield x
