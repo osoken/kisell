@@ -95,11 +95,17 @@ class Base(Iterable, with_metaclass(ABCMeta)):
         """
         pass
 
+    def _finalize(self):
+        """finalization method for inherit classes of Base.
+        """
+        pass
+
     def __iter__(self):
         """return stream
         """
         for x in self.stream:
             yield x
+        self._finalize()
 
     def run(self, hook=None):
         """just run through the loop
