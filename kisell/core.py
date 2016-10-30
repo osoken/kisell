@@ -39,6 +39,7 @@ class Base(Iterable, with_metaclass(ABCMeta)):
         """
         super(Base, self).__init__()
         self.__stream = None
+        self.__alive = True
 
     @property
     @abstractmethod
@@ -88,6 +89,14 @@ class Base(Iterable, with_metaclass(ABCMeta)):
                 self.upstream.__initialize()
             self.__stream = self._initialize()
 
+    def __finalize(self):
+        """private method which is called when the stream is finalized.
+        """
+        if self.__alive:
+            if self.upstream is not None:
+                self.upstream.__finalize()
+            self.__alive = self._finalize()
+
     @abstractmethod
     def _initialize(self):
         """initialization method for inherit classes of Base. This must be
@@ -105,7 +114,7 @@ class Base(Iterable, with_metaclass(ABCMeta)):
         """
         for x in self.stream:
             yield x
-        self._finalize()
+        self.__finalize()
 
     def __call__(self):
         """just run the iteration
