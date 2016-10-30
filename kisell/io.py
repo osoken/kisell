@@ -43,6 +43,9 @@ class FileReadStream(Origin):
             open(name, encoding=encoding, mode='r')
         )
 
+    def _finalize(self):
+        self.origin.close()
+
 
 class WriteStream(Pipe):
     """``WriteStream`` is an output stream. Write each line into ``writable``.
@@ -76,3 +79,6 @@ class FileWriteStream(WriteStream):
             open(name, encoding=encoding, mode='w'),
             lineterminator=lineterminator
         )
+
+    def _finalize(self):
+        self.origin.close()

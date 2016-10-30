@@ -79,3 +79,17 @@ class OnIterate(Pipe):
         for x in self.upstream:
             self.on_iterate(x)
             yield x
+
+
+class Count(Pipe):
+    """Add counter. ``.count`` attribute indicates how many times the iteration
+    occured.
+    """
+    def __init__(self):
+        super(Count, self).__init__()
+        self.count = 0
+
+    def _initialize(self):
+        for x in self.upstream:
+            self.count += 1
+            yield x
