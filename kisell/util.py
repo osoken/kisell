@@ -34,7 +34,6 @@ class Timing(Pipe):
         return self.upstream
 
     def _finalize(self):
-        print('TIMING FINALIZE')
         self.finalized_at = datetime.now()
 
 
