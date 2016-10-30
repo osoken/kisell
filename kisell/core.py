@@ -212,7 +212,7 @@ class Pipe(Base):
     def __getattr__(self, name):
         if self.__attribute_base is not None:
             try:
-                return self.__getattribute__(self.__attribute_base, name)
+                return self.__attribute_base.__getattribute__(name)
             except AttributeError:
                 pass
         if self.__upstream is None:
