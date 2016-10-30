@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import tempfile
+
 from builtins import open
 
 from . core import Origin, Pipe
