@@ -12,5 +12,6 @@ setup(
     description=__description__,
     long_description='',
     license='MIT',
-    packages=['kisell']
+    packages=['kisell'],
+    install_requires=['future']
 )
