@@ -64,7 +64,7 @@ class GroupBy(Pipe):
 
     def _initialize(self):
         for (k, i) in itertools.groupby(self.upstream, self.keyfunc):
-            yield (k, core.Origin(i))
+            yield (k, Origin(i))
 
 
 class Filter(Pipe):
