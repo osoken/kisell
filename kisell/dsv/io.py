@@ -5,7 +5,7 @@ import csv
 
 from .. core import Pipe
 from .. util import CompoOrigin, CompoPipe
-from .. rw import FileReadStream, FileWriteStream
+from .. io import FileReadStream, FileWriteStream
 
 
 class DSVParse(Pipe):
