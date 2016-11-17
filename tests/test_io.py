@@ -35,7 +35,7 @@ class ReadStreamTester(unittest.TestCase):
 
     def test__init__(self):
         fin = open(_license_file_path, 'r')
-        test = rw.ReadStream(fin, 100)
+        test = io.ReadStream(fin, 100)
         l = list(test)
         self.assertEqual(len(l[0]), 100)
 
@@ -48,7 +48,7 @@ class FileReadStreamTester(unittest.TestCase):
         pass
 
     def test__init__(self):
-        test = rw.FileReadStream(_license_file_path)
+        test = io.FileReadStream(_license_file_path)
         self.assertEqual(test.name, _license_file_path)
         self.assertEqual(test.encoding, 'utf-8')
         self.assertEqual(test.mode, 'r')
