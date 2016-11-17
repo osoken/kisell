@@ -7,7 +7,8 @@ install:
     - pip install -r requirements.txt -r requirements-devel.txt
     - pip install coveralls
 # command to run tests
-script: nosetests --with-xunit --with-coverage --cover-erase --cover-package=kisell
+script:
+    - nosetests --with-xunit --with-coverage --cover-erase --cover-package=kisell
 
 after_success:
     - coveralls
