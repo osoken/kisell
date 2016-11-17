@@ -9,11 +9,13 @@ from .. core import Pipe
 
 
 class _ResolveTargetField(object):
+    """Mix-in class.
+    """
 
-    def _resolve_target_field(self, target_field):
+    def _resolve_target_field(self, field, target_field):
         if isinstance(target_field, (str, bytes, re._pattern_type)):
             res = set()
-            for i, f in enumerate(self.field):
+            for i, f in enumerate(field):
                 m = re.match(target_field, f)
                 if m is not None and m.span()[1] == len(f):
                     res.add(i)
@@ -22,7 +24,7 @@ class _ResolveTargetField(object):
             return set(tuple(target_field))
         if isinstance(target_field, Iterable):
             return reduce(lambda x, y: x.union(y), (
-                self._resolve_target_field(tf) for tf in target_field
+                self._resolve_target_field(field, tf) for tf in target_field
             ))
 
 
@@ -40,7 +42,7 @@ class Filter(Pipe, _ResolveTargetField):
         self.target_field = target_field
 
     def __construct_filter(self):
-        fields = self._resolve_target_field(self.target_field)
+        fields = self._resolve_target_field(self.field, self.target_field)
         if len(fields) == 0:
             return lambda x: True
         if len(fields) == 1:
@@ -71,7 +73,7 @@ class Map(Pipe, _ResolveTargetField):
         self.target_field = target_field
 
     def __construct_map(self):
-        fields = self._resolve_target_field(self.target_field)
+        fields = self._resolve_target_field(self.field, self.target_field)
         return lambda record: [
             self.func(x) if i in fields else x for (i, x) in enumerate(record)
         ]
@@ -109,10 +111,21 @@ class Select(Pipe, _ResolveTargetField):
     def __init__(self, target_field):
         super(Select, self).__init__()
         self.target_field = target_field
+        self.__field = None
+
+    @property
+    def field(self):
+        if self.__field is not None:
+            return self.__field
+        if self.upstream is None:
+            return None
+        self.stream
+        return self.__field
 
     def _initialize(self):
-        fields = self._resolve_target_field(self.target_field)
-        self.field = [self.field[i] for i in fields]
+        fields = self._resolve_target_field(self.upstream.field,
+                                            self.target_field)
+        self.__field = [self.upstream.field[i] for i in fields]
         for x in self.upstream:
             yield [x[i] for i in fields]
 
@@ -126,12 +139,23 @@ class Deselect(Pipe, _ResolveTargetField):
     def __init__(self, target_field):
         super(Select, self).__init__()
         self.target_field = target_field
+        self.__field = None
+
+    @property
+    def field(self):
+        if self.__field is not None:
+            return self.__field
+        if self.upstream is None:
+            return None
+        self.stream
+        return self.__field
 
     def _initialize(self):
         fields = [
             i for i in range(len(self.field))
-            if i not in self._resolve_target_field(self.target_field)
+            if i not in self._resolve_target_field(self.upstream.field,
+                                                   self.target_field)
         ]
-        self.field = [self.field[i] for i in fields]
+        self.__field = [self.upstream.field[i] for i in fields]
         for x in self.upstream:
             yield [x[i] for i in fields]
