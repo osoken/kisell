@@ -128,7 +128,7 @@ class Origin(Base):
     """The base class of ``kisell`` class with no upstream.
 
     :param origin: an iterable or an object
-    :param generator: None or a one-argument function which makes origin
+    :param generator: None or a one-argument function which makes origin\
     iterable.
     """
     def __init__(self, origin, generator=None):
