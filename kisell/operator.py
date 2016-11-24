@@ -27,10 +27,14 @@ class Skip(Pipe):
 
     def _initialize(self):
         count = 0
-        while count < self.skip:
-            next(self.upstream)
-            count += 1
-        yield from self.upstream
+        for x in self.upstream:
+            if count < self.skip:
+                count += 1
+            else:
+                yield x
+                break
+        for x in self.upstream:
+            yield x
 
 
 class Chain(Pipe):
@@ -41,9 +45,11 @@ class Chain(Pipe):
 
     def _initialize(self):
         if self.upstream is not None:
-            yield from self.upstream
+            for x in self.upstream:
+                yield x
         for it in self.iterables:
-            yield from it
+            for x in it:
+                yield x
 
 
 class Enumerate(Pipe):
@@ -85,7 +91,8 @@ class Zip(Pipe):
                                for it in iterables)
 
     def _initialize(self):
-        yield from zip(self.upstream, *self.iterables)
+        for x in zip(self.upstream, *self.iterables):
+            yield x
 
 
 class Map(Pipe):
@@ -96,7 +103,8 @@ class Map(Pipe):
                                for it in iterables)
 
     def _initialize(self):
-        yield from map(self.func, self.upstream, *self.iterables)
+        for x in map(self.func, self.upstream, *self.iterables):
+            yield x
 
 
 class StarMap(Pipe):
@@ -105,7 +113,8 @@ class StarMap(Pipe):
         self.func = func
 
     def _initialize(self):
-        yield from itertools.starmap(self.func, self.upstream)
+        for x in itertools.starmap(self.func, self.upstream):
+            yield x
 
 
 class Accumulate(Pipe):
@@ -114,5 +123,6 @@ class Accumulate(Pipe):
         self.func = func
 
     def _initialize(self):
-        yield from itertools.accumulate(self.upstream,
-                                        self.func or operator.add)
+        for x in itertools.accumulate(self.upstream,
+                                      self.func or operator.add):
+            yield x
