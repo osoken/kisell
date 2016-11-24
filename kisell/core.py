@@ -41,21 +41,21 @@ class Base(Iterable, with_metaclass(ABCMeta)):
         self.__stream = None
         self.__alive = True
 
-    @property
     @abstractmethod
-    def upstream(self):
+    def _get_upstream(self):
         """return upstream of this instance or None
         """
         pass
 
-    @upstream.setter
     @abstractmethod
-    def upstream(self, s):
+    def _set_upstream(self, s):
         """set the upstream of this instance
 
         :param s: instance of Base class
         """
         pass
+
+    upstream = property(_get_upstream, _set_upstream)
 
     @property
     def stream(self):
@@ -154,17 +154,17 @@ class Origin(Base):
         """
         return self.__origin
 
-    @property
-    def upstream(self):
+    def _get_upstream(self):
         """return ``None``
         """
         return None
 
-    @upstream.setter
-    def upstream(self, s):
+    def _set_upstream(self, s):
         """raises ``OriginWithUpstreamError``
         """
         raise OriginWithUpstreamError()
+
+    upstream = property(_get_upstream, _set_upstream)
 
     def _initialize(self):
         """return iterator from the origin object.
@@ -205,18 +205,18 @@ class Pipe(Base):
         self.__upstream = None
         self.__attribute_base = attribute_base
 
-    @property
-    def upstream(self):
+    def _get_upstream(self):
         if self.__upstream is None:
             raise EmptyPipeError()
         return self.__upstream
 
-    @upstream.setter
-    def upstream(self, s):
+    def _set_upstream(self, s):
         if self.__upstream is None:
             self.__upstream = s
         else:
             self.__upstream.upstream = s
+
+    upstream = property(_get_upstream, _set_upstream)
 
     def __getattr__(self, name):
         if self.__attribute_base is not None:
