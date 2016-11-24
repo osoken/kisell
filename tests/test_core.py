@@ -268,6 +268,7 @@ class PipeTester(unittest.TestCase):
         with test:
             pass
         self.assertTrue(test.closed)
+        self.assertTrue(fin.closed)
 
 
 if __name__ == '__main__':
