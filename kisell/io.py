@@ -51,7 +51,7 @@ class WriteStream(Pipe):
     and yields ``None``.
 
     :param writable: writable object
-    :param lineterminator: line terminator (default: ``\\n``). specify ``''``
+    :param lineterminator: line terminator (default: ``\\n``). specify ``''``\
     not to add lineterminator
     """
     def __init__(self, writable, lineterminator='\n'):
@@ -70,7 +70,7 @@ class FileWriteStream(WriteStream):
 
     :param name: file name
     :param encoding: file encoding (defautl: utf-8)
-    :param lineterminator: line end character (default: ``\\n'')
+    :param lineterminator: line end character (default: ``\\n``)
     """
     def __init__(self, name, encoding='utf-8', lineterminator='\n'):
         super(FileWriteStream, self).__init__(
