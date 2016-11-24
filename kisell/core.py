@@ -246,10 +246,3 @@ class Pipe(Base):
             self.upstream.__exit__(type, value, traceback)
             return retval
         return self.upstream.__exit__(type, value, traceback)
-
-
-class Subpipe(Pipe):
-    """
-    """
-    def __init__(self):
-        pass

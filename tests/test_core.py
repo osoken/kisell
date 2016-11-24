@@ -249,6 +249,11 @@ class PipeTester(unittest.TestCase):
         self.assertNotEqual(p2.name, p0.name)
         self.assertNotEqual(p2.name, p1.name)
         fin.close()
+        attr_base = 'abc'
+        p0 = PipeTester.ConcretePipe(attr_base)
+        self.assertEqual(len(attr_base), p0.__len__())
+        with self.assertRaises(AttributeError):
+            p0.still_non_such_attribute
 
     def test__enter__exit__(self):
         fin = open(_license_file_path, 'r')
@@ -257,6 +262,12 @@ class PipeTester(unittest.TestCase):
         with test:
             pass
         self.assertTrue(fin.closed)
+        test = PipeTester.ConcretePipe(open(_license_file_path, 'r'))
+        fin = open(_license_file_path, 'r')
+        test.upstream = fin
+        with test:
+            pass
+        self.assertTrue(test.closed)
 
 
 if __name__ == '__main__':
