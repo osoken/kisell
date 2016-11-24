@@ -22,15 +22,16 @@ class BaseTester(unittest.TestCase):
             self.__upstream = None
             self.init_count = 0
 
-        @property
-        def upstream(self):
+        def _get_upstream(self):
+            super(BaseTester.Concrete, self)._get_upstream()
             return self.__upstream
 
-        @upstream.setter
-        def upstream(self, s):
+        def _set_upstream(self, s):
+            super(BaseTester.Concrete, self)._set_upstream(s)
             self.__upstream = s
 
         def _initialize(self):
+            super(BaseTester.Concrete, self)._initialize()
             self.init_count += 1
             if self.upstream is None:
                 for x in range(4):
@@ -38,6 +39,8 @@ class BaseTester(unittest.TestCase):
             else:
                 for x in self.upstream:
                     yield x + 1
+
+        upstream = property(_get_upstream, _set_upstream)
 
     def setUp(self):
         pass
@@ -190,8 +193,8 @@ class OriginTester(unittest.TestCase):
 class PipeTester(unittest.TestCase):
 
     class ConcretePipe(core.Pipe):
-        def __init__(self):
-            super(PipeTester.ConcretePipe, self).__init__()
+        def __init__(self, base=None):
+            super(PipeTester.ConcretePipe, self).__init__(base)
 
         def _initialize(self):
             for x in self.upstream:
@@ -245,6 +248,7 @@ class PipeTester(unittest.TestCase):
         self.assertEqual(p2.name, fin.name)
         self.assertNotEqual(p2.name, p0.name)
         self.assertNotEqual(p2.name, p1.name)
+        fin.close()
 
     def test__enter__exit__(self):
         fin = open(_license_file_path, 'r')
