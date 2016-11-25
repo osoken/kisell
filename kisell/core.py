@@ -206,11 +206,17 @@ class Pipe(Base):
         self.__attribute_base = attribute_base
 
     def _get_upstream(self):
+        """return upstream of this instance. Raise ``EmptyPipeError`` if it
+        is ``None``.
+        """
         if self.__upstream is None:
             raise EmptyPipeError()
         return self.__upstream
 
     def _set_upstream(self, s):
+        """set upstream of this instance if the upstream is ``None``,
+        set upstream of the upstream otherwise.
+        """
         if self.__upstream is None:
             self.__upstream = s
         else:
