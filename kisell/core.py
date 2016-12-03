@@ -39,22 +39,23 @@ class Base(Iterable, with_metaclass(ABCMeta)):
         """
         super(Base, self).__init__()
         self.__stream = None
+        self.__alive = True
 
-    @property
     @abstractmethod
-    def upstream(self):
+    def _get_upstream(self):
         """return upstream of this instance or None
         """
         pass
 
-    @upstream.setter
     @abstractmethod
-    def upstream(self, s):
+    def _set_upstream(self, s):
         """set the upstream of this instance
 
         :param s: instance of Base class
         """
         pass
+
+    upstream = property(_get_upstream, _set_upstream)
 
     @property
     def stream(self):
@@ -88,6 +89,14 @@ class Base(Iterable, with_metaclass(ABCMeta)):
                 self.upstream.__initialize()
             self.__stream = self._initialize()
 
+    def __finalize(self):
+        """private method which is called when the stream is finalized.
+        """
+        if self.__alive:
+            if self.upstream is not None:
+                self.upstream.__finalize()
+            self.__alive = self._finalize()
+
     @abstractmethod
     def _initialize(self):
         """initialization method for inherit classes of Base. This must be
@@ -105,7 +114,7 @@ class Base(Iterable, with_metaclass(ABCMeta)):
         """
         for x in self.stream:
             yield x
-        self._finalize()
+        self.__finalize()
 
     def __call__(self):
         """just run the iteration
@@ -119,7 +128,7 @@ class Origin(Base):
     """The base class of ``kisell`` class with no upstream.
 
     :param origin: an iterable or an object
-    :param generator: None or a one-argument function which makes origin
+    :param generator: None or a one-argument function which makes origin\
     iterable.
     """
     def __init__(self, origin, generator=None):
@@ -145,17 +154,17 @@ class Origin(Base):
         """
         return self.__origin
 
-    @property
-    def upstream(self):
+    def _get_upstream(self):
         """return ``None``
         """
         return None
 
-    @upstream.setter
-    def upstream(self, s):
+    def _set_upstream(self, s):
         """raises ``OriginWithUpstreamError``
         """
         raise OriginWithUpstreamError()
+
+    upstream = property(_get_upstream, _set_upstream)
 
     def _initialize(self):
         """return iterator from the origin object.
@@ -196,23 +205,29 @@ class Pipe(Base):
         self.__upstream = None
         self.__attribute_base = attribute_base
 
-    @property
-    def upstream(self):
+    def _get_upstream(self):
+        """return upstream of this instance. Raise ``EmptyPipeError`` if it
+        is ``None``.
+        """
         if self.__upstream is None:
             raise EmptyPipeError()
         return self.__upstream
 
-    @upstream.setter
-    def upstream(self, s):
+    def _set_upstream(self, s):
+        """set upstream of this instance if the upstream is ``None``,
+        set upstream of the upstream otherwise.
+        """
         if self.__upstream is None:
             self.__upstream = s
         else:
             self.__upstream.upstream = s
 
+    upstream = property(_get_upstream, _set_upstream)
+
     def __getattr__(self, name):
         if self.__attribute_base is not None:
             try:
-                return self.__getattribute__(self.__attribute_base, name)
+                return self.__attribute_base.__getattribute__(name)
             except AttributeError:
                 pass
         if self.__upstream is None:

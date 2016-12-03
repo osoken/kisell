@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-import re
-import tempfile
 import unittest
 
-from kisell.core import Origin, Pipe
+from kisell.core import Pipe
 from kisell import io
 
 
