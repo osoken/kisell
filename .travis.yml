@@ -1,14 +1,14 @@
 language: python
 python:
-    - "2.7"
-    - "3.5"
-# command to install dependencies
+- '2.7'
+- '3.5'
 install:
-    - pip install -r requirements.txt -r requirements-devel.txt
-    - pip install coveralls
-# command to run tests
+- pip install -r requirements.txt -r requirements-devel.txt
+- pip install coveralls
 script:
-    - nosetests --with-xunit --with-coverage --cover-erase --cover-package=kisell
-
+- nosetests --with-xunit --with-coverage --cover-erase --cover-package=kisell
 after_success:
-    - coveralls
+- coveralls
+notifications:
+  slack:
+    secure: r8k7ikcWnZq350bZga0USzBbIxSuIE1IEK6wNKzzTSq/hzGNnhbEDQAJL3dE1bJxjsbPha3lGHu2xKmIiO95L4cDqR0KhR/34CyfplbSN+rfiJGEmBQTw2EmKbj//ny/VREq/NxclBvJQvwBuG70vZdu5RlN3CIM+YrGnmjTgp+opSCXnnpl8hefA1E77PJJXVj75XKjQd6I1Qfj4kma/6M9CrfYkpxkdCo6t5r4yER2UxkirciIGb9PCVkdDiKVUpejJS53gs4eEIlmmiJqXzDLqaxJn7PXD3xgOu8AxyaicH0l9LRj8/lT1udnmYd5EuHg9O/8FCVGpbUut2Q8iO/8fq6L5dxdTpgPFwC1hEuXdwXaZtjxSH6si87FQpDg8iP3/Y+7jl2i+yUtrZeRbd1le81t+OPK4ESPjZFSwNra5jJSp7AiEnkpDiz3TOxi6ogZ8nlJFF2uNiXX3sXcO/ydp9WF5v9zIOfRAhFN0mON+cpgE9QHovkKeNYTgf4oT4kwhibFOM/9nbiGAFgCFO9n2hMHisbyCkjAsgSTxZGzOlx3DBTc/BS/Ebz2DhdRgeSdHA2MTs5xfnZ4uGw9fqVk3rWny2Tg30x8tQ353MKs/wVZ4Rry3YttLmcEmPCRj4kZOehRSrME5n/8A7hnuZk0QNugI8vBPM6Sf7y6/FQ=
